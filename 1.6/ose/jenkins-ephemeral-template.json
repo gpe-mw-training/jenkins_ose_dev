@@ -91,7 +91,7 @@
             "containers": [
               {
                 "name": "jenkins",
-                "image": "openshift/jenkins-16-centos7",
+                "image": "jbride/jenkins-ose-dev",
                 "env": [
                   {
                     "name": "JENKINS_PASSWORD",
