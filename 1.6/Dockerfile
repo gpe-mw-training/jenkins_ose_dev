@@ -29,12 +29,6 @@ LABEL k8s.io.description="Jenkins is a continuous integration server" \
 # 8080 for main web interface, 50000 for slave agents
 EXPOSE 8080 50000
 
-#RUN  curl -L -o /tmp/git.hpi http://updates.jenkins-ci.org/latest/git.hpi
-#RUN  curl -L -o /tmp/git-client.hpi http://updates.jenkins-ci.org/latest/git-client.hpi
-#RUN  curl -L -o /tmp/scm-api.hpi http://updates.jenkins-ci.org/latest/scm-api.hpi
-#RUN  curl -L -o /tmp/ssh-credentials.hpi http://updates.jenkins-ci.org/latest/ssh-credentials.hpi
-#RUN  curl -L -o /tmp/credentials.hpi http://updates.jenkins-ci.org/latest/credentials.hpi
-
 
 
 RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenkins.repo && \
@@ -47,11 +41,23 @@ RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenki
     rm oadm && \
     rm openshift
 
+# JA Bride:  adding needed git plugin
+RUN mkdir -p /var/lib/jenkins/plugins
+RUN curl -L -o /var/lib/jenkins/plugins/git.hpi http://updates.jenkins-ci.org/latest/git.hpi
+RUN curl -L -o /var/lib/jenkins/plugins/git-client.hpi http://updates.jenkins-ci.org/latest/git-client.hpi
+RUN curl -L -o /var/lib/jenkins/plugins/scm-api.hpi http://updates.jenkins-ci.org/latest/scm-api.hpi
+RUN curl -L -o /var/lib/jenkins/plugins/ssh-credentials.hpi http://updates.jenkins-ci.org/latest/ssh-credentials.hpi
+RUN curl -L -o /var/lib/jenkins/plugins/credentials.hpi http://updates.jenkins-ci.org/latest/credentials.hpi
+RUN curl -L -o /var/lib/jenkins/plugins/mailer.hpi http://updates.jenkins-ci.org/latest/mailer.hpi
+
 COPY run.sh /usr/local/bin/run.sh
 COPY ./contrib/ /opt/openshift
 RUN  chmod -R og+rw /opt/openshift
 
 VOLUME ["/var/lib/jenkins"]
+
+RUN mkdir /var/lib/jenkins/.m2
+COPY contrib/configuration/settings.xml /var/lib/jenkins/.m2/settings.xml
 
 # JA Bride
 # Modifying to jenkins because otherwise end up wth the following error when attempting to execute git:
