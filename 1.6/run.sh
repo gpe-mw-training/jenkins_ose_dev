@@ -14,7 +14,9 @@ new_password_hash=`obfuscate_password ${JENKINS_PASSWORD:-password}`
 
 if [ ! -e /var/lib/jenkins/configured ]; then
   cp -r /opt/openshift/configuration/* /var/lib/jenkins
+  cp -r /opt/openshift/configuration/.m2 /var/lib/jenkins
   rm -rf /opt/openshift/configuration/*
+  rm -rf /opt/openshift/configuration/.m2
   
   sed -i "s,<passwordHash>.*</passwordHash>,<passwordHash>$new_password_hash</passwordHash>,g" "/var/lib/jenkins/users/admin/config.xml"
   echo $new_password_hash > /var/lib/jenkins/password

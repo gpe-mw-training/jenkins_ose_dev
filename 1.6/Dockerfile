@@ -2,6 +2,7 @@ FROM centos:centos7
 
 # JA Bride
 # sudo docker build --rm=true -t jbride/jenkins-ose-dev .
+# sudo docker run -i -t jbride/jenkins-ose-dev
 # sudo docker tag -f jbride/jenkins-ose-dev docker.io/jbride/jenkins-ose-dev
 # sudo docker push docker.io/jbride/jenkins-ose-dev
 
@@ -30,6 +31,7 @@ LABEL k8s.io.description="Jenkins is a continuous integration server" \
 EXPOSE 8080 50000
 
 
+RUN mkdir -p /opt/openshift/configuration/plugins
 
 RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenkins.repo && \
     rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key && \
@@ -42,13 +44,12 @@ RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenki
     rm openshift
 
 # JA Bride:  adding needed git plugin
-RUN mkdir -p /var/lib/jenkins/plugins
-RUN curl -L -o /var/lib/jenkins/plugins/git.hpi http://updates.jenkins-ci.org/latest/git.hpi
-RUN curl -L -o /var/lib/jenkins/plugins/git-client.hpi http://updates.jenkins-ci.org/latest/git-client.hpi
-RUN curl -L -o /var/lib/jenkins/plugins/scm-api.hpi http://updates.jenkins-ci.org/latest/scm-api.hpi
-RUN curl -L -o /var/lib/jenkins/plugins/ssh-credentials.hpi http://updates.jenkins-ci.org/latest/ssh-credentials.hpi
-RUN curl -L -o /var/lib/jenkins/plugins/credentials.hpi http://updates.jenkins-ci.org/latest/credentials.hpi
-RUN curl -L -o /var/lib/jenkins/plugins/mailer.hpi http://updates.jenkins-ci.org/latest/mailer.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/git.hpi http://updates.jenkins-ci.org/latest/git.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/git-client.hpi http://updates.jenkins-ci.org/latest/git-client.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/scm-api.hpi http://updates.jenkins-ci.org/latest/scm-api.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/ssh-credentials.hpi http://updates.jenkins-ci.org/latest/ssh-credentials.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/credentials.hpi http://updates.jenkins-ci.org/latest/credentials.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/mailer.hpi http://updates.jenkins-ci.org/latest/mailer.hpi
 
 COPY run.sh /usr/local/bin/run.sh
 COPY ./contrib/ /opt/openshift
@@ -56,16 +57,13 @@ RUN  chmod -R og+rw /opt/openshift
 
 VOLUME ["/var/lib/jenkins"]
 
-RUN mkdir /var/lib/jenkins/.m2
-COPY contrib/configuration/settings.xml /var/lib/jenkins/.m2/settings.xml
-
 # JA Bride
 # Modifying to jenkins because otherwise end up wth the following error when attempting to execute git:
 #   fatal: unable to look up current user in the passwd file: no such user
 # Need to also modify cluster security:  oc edit scc restricted
 # Change runAsUser -> type: RunAsAny
 #USER 1001
-RUN chown -R jenkins:jenkins /var/lib/jenkins
+RUN chown -R jenkins:jenkins /var/lib/jenkins/
 USER jenkins
 
 ENTRYPOINT ["/usr/local/bin/run.sh"]

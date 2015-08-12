@@ -26,8 +26,11 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CONFIG</name>
-          <description>The name of the BuildConfig to trigger</description>
-          <defaultValue>bookstore</defaultValue>
+          <description>
+            The name of the BuildConfig to trigger.
+            Corresponds to BuildConfig object that includes the DISABLE_ASSET_COMPILATION and APPLICATION_ARTIFACT_URL environment variables.
+          </description>
+          <defaultValue>bookstore-jenkins</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>TEST_IMAGE_TAG</name>
