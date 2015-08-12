@@ -1,5 +1,10 @@
 FROM centos:centos7
 
+# JA Bride
+# sudo docker build --rm=true -t jbride/jenkins-ose-dev .
+# sudo docker tag -f jbride/jenkins-ose-dev docker.io/jbride/jenkins-ose-dev
+# sudo docker push docker.io/jbride/jenkins-ose-dev
+
 # Jenkins image for OpenShift
 #
 # This image provides a Jenkins server, primarily intended for integration with
@@ -47,6 +52,13 @@ RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenki
 
 VOLUME ["/var/lib/jenkins"]
 
-USER 1001
+# JA Bride
+# Modifying to jenkins because otherwise end up wth the following error when attempting to execute git:
+#   fatal: unable to look up current user in the passwd file: no such user
+# Need to also modify cluster security:  oc edit scc restricted
+# Change runAsUser -> type: RunAsAny
+#USER 1001
+RUN chown -R jenkins:jenkins /var/lib/jenkins
+USER jenkins
 
 ENTRYPOINT ["/usr/local/bin/run.sh"]
