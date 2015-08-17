@@ -9,7 +9,7 @@
         <hudson.model.StringParameterDefinition>
           <name>OSE_NEXUS_HOST</name>
           <description>Hostname of Nexus</description>
-          <defaultValue>nexus.ose.jbrideratwater.com</defaultValue>
+          <defaultValue>nexus.devops.ose.jbrideratwater.com</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -45,7 +45,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Maven>
-      <targets>clean package</targets>
+      <targets>clean package -DOSE_NEXUS_HOST=$OSE_NEXUS_HOST</targets>
       <usePrivateRepository>false</usePrivateRepository>
       <settings class="jenkins.mvn.DefaultSettingsProvider"/>
       <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
