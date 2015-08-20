@@ -57,6 +57,14 @@ RUN  chmod -R og+rw /opt/openshift
 
 VOLUME ["/var/lib/jenkins"]
 
+# JA Bride:  upgrading maven, otherwise stock maven from rhel-7-server-optional-rpms channel is used which currently is v3.0.5
+# This version of Maven causes lots of problems
+ENV MAVEN_VERSION=3.3.3
+RUN curl -L -o /tmp/apache-maven.tar.gz http://ftp.wayne.edu/apache/maven/maven-3/3.3.3/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+    tar -zxvf /tmp/apache-maven.tar.gz -C /opt && \
+    rm -f /tmp/apache-maven.tar.gz && \
+    echo "export PATH=/opt/apache-maven-$MAVEN_VERSION/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/sbin:/usr/sbin" >> ~/.bashrc 
+
 # JA Bride
 # Modifying to jenkins because otherwise end up wth the following error when attempting to execute git:
 #   fatal: unable to look up current user in the passwd file: no such user
