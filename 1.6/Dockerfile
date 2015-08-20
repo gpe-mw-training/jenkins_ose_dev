@@ -62,8 +62,8 @@ VOLUME ["/var/lib/jenkins"]
 ENV MAVEN_VERSION=3.3.3
 RUN curl -L -o /tmp/apache-maven.tar.gz http://ftp.wayne.edu/apache/maven/maven-3/3.3.3/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
     tar -zxvf /tmp/apache-maven.tar.gz -C /opt && \
-    rm -f /tmp/apache-maven.tar.gz && \
-    echo "export PATH=/opt/apache-maven-$MAVEN_VERSION/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/sbin:/usr/sbin" >> /etc/profile.d/maven_path.sh
+    rm -f /tmp/apache-maven.tar.gz
+ENV PATH=/opt/apache-maven-$MAVEN_VERSION/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/sbin:/usr/sbin
 
 # JA Bride
 # Modifying to jenkins because otherwise end up wth the following error when attempting to execute git:
