@@ -1,5 +1,7 @@
 #!/bin/bash
 
+OUTPUT=/tmp/run.log
+
 function obfuscate_password {
     local password="$1"
     local acegi_security_path=`find /tmp/war/WEB-INF/lib/ -name acegi-security-*.jar`
@@ -7,6 +9,7 @@ function obfuscate_password {
 
     java -classpath "${acegi_security_path}:${commons_codec_path}:/opt/openshift/password-encoder.jar" com.redhat.openshift.PasswordEncoder $password
 }
+
 
 mkdir /tmp/war
 unzip -q /usr/lib/jenkins/jenkins.war -d /tmp/war
@@ -36,9 +39,10 @@ if [ -e /var/lib/jenkins/password ]; then
 fi
 rm -rf /tmp/war
 
+# JA Bride:  explicitly use java 1.8
 # if `docker run` first argument start with `--` the user is passing jenkins launcher arguments
 if [[ $# -lt 1 ]] || [[ "$1" == "--"* ]]; then
-   exec java $JAVA_OPTS -Dfile.encoding=UTF8 -jar /usr/lib/jenkins/jenkins.war $JENKINS_OPTS "$@"
+   exec /usr/lib/jvm/java-1.8.0-openjdk/bin/java $JAVA_OPTS -Dfile.encoding=UTF8 -jar /usr/lib/jenkins/jenkins.war $JENKINS_OPTS "$@"
 fi
 
 

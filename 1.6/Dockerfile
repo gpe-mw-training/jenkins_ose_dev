@@ -35,7 +35,7 @@ RUN mkdir -p /opt/openshift/configuration/plugins
 
 RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenkins.repo && \
     rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key && \
-    yum install -y tar zip unzip java-1.7.0-openjdk jenkins-1.609 git maven && \
+    yum install -y tar zip unzip java-1.8.0-openjdk-devel jenkins-1.609 git && \
     yum clean all  && \
     chmod og+rw /var/lib/jenkins && \
     curl -L https://github.com/openshift/origin/releases/download/v1.0.2/openshift-origin-v1.0.2-325c7b7-linux-amd64.tar.gz | tar -zx && \
@@ -51,12 +51,6 @@ RUN curl -L -o /opt/openshift/configuration/plugins/ssh-credentials.hpi http://u
 RUN curl -L -o /opt/openshift/configuration/plugins/credentials.hpi http://updates.jenkins-ci.org/latest/credentials.hpi
 RUN curl -L -o /opt/openshift/configuration/plugins/mailer.hpi http://updates.jenkins-ci.org/latest/mailer.hpi
 
-COPY run.sh /usr/local/bin/run.sh
-COPY ./contrib/ /opt/openshift
-RUN  chmod -R og+rw /opt/openshift
-
-VOLUME ["/var/lib/jenkins"]
-
 # JA Bride:  upgrading maven, otherwise stock maven from rhel-7-server-optional-rpms channel is used which currently is v3.0.5
 # This version of Maven causes lots of problems
 ENV MAVEN_VERSION=3.3.3
@@ -64,6 +58,12 @@ RUN curl -L -o /tmp/apache-maven.tar.gz http://ftp.wayne.edu/apache/maven/maven-
     tar -zxvf /tmp/apache-maven.tar.gz -C /opt && \
     rm -f /tmp/apache-maven.tar.gz
 ENV PATH=/opt/apache-maven-$MAVEN_VERSION/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/sbin:/usr/sbin
+
+COPY run.sh /usr/local/bin/run.sh
+COPY ./contrib/ /opt/openshift
+RUN  chmod -R og+rw /opt/openshift
+
+VOLUME ["/var/lib/jenkins"]
 
 # JA Bride
 # Modifying to jenkins because otherwise end up wth the following error when attempting to execute git:
