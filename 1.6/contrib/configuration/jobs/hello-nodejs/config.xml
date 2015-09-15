@@ -3,23 +3,12 @@
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
-  <keepDependencies>false</keepDependencies>
-  <properties>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>OSE_NEXUS_HOST</name>
-          <description>Hostname of Nexus</description>
-          <defaultValue>inf00-mwl.opentlc.com</defaultValue>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
-  </properties>
+  <properties/>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/gpe-mw-training/bookstore.git</url>
+        <url>https://github.com/gpe-mw-training/ose-dev3-helloworld-nodejs.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -34,7 +23,7 @@
     </extensions>
   </scm>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -45,23 +34,23 @@
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <hudson.tasks.Maven>
-      <targets>clean package -DOSE_NEXUS_HOST=$OSE_NEXUS_HOST</targets>
-      <usePrivateRepository>false</usePrivateRepository>
-      <settings class="jenkins.mvn.DefaultSettingsProvider"/>
-      <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
-    </hudson.tasks.Maven>
+    <hudson.tasks.Shell>
+      <command>npm install</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>npm test</command>
+    </hudson.tasks.Shell>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>target/*.war</artifacts>
+      <artifacts>target/*.*</artifacts>
       <allowEmptyArchive>false</allowEmptyArchive>
       <onlyIfSuccessful>false</onlyIfSuccessful>
       <fingerprint>false</fingerprint>
       <defaultExcludes>true</defaultExcludes>
     </hudson.tasks.ArtifactArchiver>
     <hudson.tasks.BuildTrigger>
-      <childProjects>bookstore-invoke-ose3</childProjects>
+      <childProjects>hello-nodejs-invoke-ose3</childProjects>
       <threshold>
         <name>SUCCESS</name>
         <ordinal>0</ordinal>

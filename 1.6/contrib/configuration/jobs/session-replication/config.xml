@@ -9,7 +9,7 @@
         <hudson.model.StringParameterDefinition>
           <name>OSE_NEXUS_HOST</name>
           <description>Hostname of Nexus</description>
-          <defaultValue>nexus.devops.ose.jbrideratwater.com</defaultValue>
+          <defaultValue>inf00-mwl.opentlc.com</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>

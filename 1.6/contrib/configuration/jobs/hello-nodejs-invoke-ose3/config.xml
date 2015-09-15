@@ -9,48 +9,35 @@
         <hudson.model.StringParameterDefinition>
           <name>OPENSHIFT_API_URL</name>
           <description>URL of the OpenShift api endpoint.</description>
-          <defaultValue>https://master00-mwl.opentlc.com.com:8443</defaultValue>
+          <defaultValue>https://master00-mwl.opentlc.com:8443</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>AUTH_TOKEN</name>
-          <description>Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.  
-          If you are running Jenkins in the same OpenShift deployment that it is communicating with and 
-          you have granted appropriate roles to the service account for the pod (normally &quot;default&quot;), you can leave this blank.
+          <description>Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
           </description>
           <defaultValue></defaultValue>
         </hudson.model.TextParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PROJECT</name>
           <description>The OpenShift project this job will access</description>
-          <defaultValue>devops</defaultValue>
+          <defaultValue>jbride-redhat-osedev</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CONFIG</name>
-          <description>
-            The name of the BuildConfig to trigger.
+          <description>The name of the BuildConfig to trigger.
             Corresponds to BuildConfig object that includes the DISABLE_ASSET_COMPILATION and APPLICATION_ARTIFACT_URL environment variables.
           </description>
-          <defaultValue>session-replication-jenkins</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>TEST_IMAGE_TAG</name>
-          <description>The image:tag produced by the BuildConfig which will be tagged for promotion if the tests are successful.</description>
-          <defaultValue>session-replication:latest</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PRODUCTION_IMAGE_TAG</name>
-          <description>The tag to apply to the tested image to trigger a production deployment.</description>
-          <defaultValue>session-replication:prod</defaultValue>
+          <defaultValue>helloworld-nodejs</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>SERVICE</name>
           <description>The service to test after build completion</description>
-          <defaultValue>session-replication</defaultValue>
+          <defaultValue>helloworld-nodejs</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>DEPLOYMENT_CONFIG</name>
           <description>The name of the DeploymentConfig that deploys the output of the BuildConfig</description>
-          <defaultValue>session-replication</defaultValue>
+          <defaultValue>helloworld-nodejs</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -70,7 +57,7 @@ fi
 
 if [ -e /run/secrets/kubernetes.io/serviceaccount/ca.crt ]; then
   alias oc=&quot;oc -n $PROJECT --token=$AUTH_TOKEN --server=$OPENSHIFT_API_URL --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt &quot;
-else 
+else
   alias oc=&quot;oc -n $PROJECT --token=$AUTH_TOKEN --server=$OPENSHIFT_API_URL --insecure-skip-tls-verify &quot;
 fi
 
@@ -118,7 +105,7 @@ while [ $rc -ne 0 -a $count -lt $attempts ]; do
   if [ $status == &quot;Complete&quot; ]; then
     echo &quot;Build completed successfully, will test deployment next&quot;
     rc=0
-  else 
+  else
     count=$(($count+1))
     echo &quot;Attempt $count/$attempts&quot;
     sleep 5
@@ -142,7 +129,7 @@ while [ $new_rc_id == $old_rc_id -a $count -lt $attempts ]; do
   oc get rc -t &apos;{{ range .items }}{{.spec.selector.deploymentconfig}}{{&quot; &quot;}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}&apos; | grep -e &quot;^$DEPLOYMENT_CONFIG &quot; | awk &apos;{print $2}&apos; | while read -r test_rc_id; do
     echo $test_rc_id &gt; new_rc_id
   done
-  new_rc_id=`cat new_rc_id`  
+  new_rc_id=`cat new_rc_id`
   count=$(($count+1))
   sleep 1
 done
@@ -160,34 +147,6 @@ done
 test_rc_id=`cat test_rc_id`
 echo &quot;Scaling up new deployment $test_rc_id&quot;
 oc scale --replicas=1 rc $test_rc_id
-
-
-# NOT USED in JB290:  Continuous Delivery covered in JB390
-#echo &quot;Checking for successful test deployment at $TEST_ENDPOINT&quot;
-#set +e
-#rc=1
-#count=0
-#attempts=100
-#while [ $rc -ne 0 -a $count -lt $attempts ]; do
-#  if curl -s --connect-timeout 2 $TEST_ENDPOINT &gt;&amp; /dev/null; then
-#    rc=0
-#    break
-#  fi
-#  count=$(($count+1))
-#  echo &quot;Attempt $count/$attempts&quot;
-#  sleep 5
-#done
-#set -e
-
-#if [ $rc -ne 0 ]; then
-#    echo &quot;Failed to access test deployment, aborting roll out.&quot;
-#    exit 1
-#fi
-
-
-# Tag the image into production
-#echo &quot;Test deployment succeeded, rolling out to production...&quot;
-#oc tag $TEST_IMAGE_TAG $PRODUCTION_IMAGE_TAG
       </command>
     </hudson.tasks.Shell>
   </builders>

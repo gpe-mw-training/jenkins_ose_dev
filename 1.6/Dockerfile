@@ -59,6 +59,11 @@ RUN curl -L -o /tmp/apache-maven.tar.gz http://ftp.wayne.edu/apache/maven/maven-
     rm -f /tmp/apache-maven.tar.gz
 ENV PATH=/opt/apache-maven-$MAVEN_VERSION/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/sbin:/usr/sbin
 
+# JA Bride:  installing nodejs and npm to support CI of javascript apps
+RUN rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm && \
+    yum install -y nodejs npm && \
+    yum clean all
+
 COPY run.sh /usr/local/bin/run.sh
 COPY ./contrib/ /opt/openshift
 RUN  chmod -R og+rw /opt/openshift
