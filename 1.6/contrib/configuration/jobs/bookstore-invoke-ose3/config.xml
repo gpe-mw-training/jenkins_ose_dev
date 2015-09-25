@@ -64,7 +64,17 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>if [ -z &quot;$AUTH_TOKEN&quot; ]; then
+      <command>
+
+# JA Bride:  Notes from discussion with Jim and Ricardo (GLS) on 25 Sept
+#   - This script is one approach to CI/CD but may likely not be a best practice in most shops
+#     1)  too automated
+#     2)  forces a 'recreate' style deployment in OSE instead of allowing ops team to configure this in the OSE DeploymentConfig as per:
+#       - https://access.redhat.com/documentation/en/openshift-enterprise/version-3.0/openshift-enterprise-30-developer-guide#strategies
+#   - Jenkins Delivery Pipeline plugin provides more options
+#       - https://wiki.jenkins-ci.org/display/JENKINS/Delivery+Pipeline+Plugin
+
+if [ -z &quot;$AUTH_TOKEN&quot; ]; then
   AUTH_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
 fi
 
