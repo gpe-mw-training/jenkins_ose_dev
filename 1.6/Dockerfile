@@ -51,6 +51,17 @@ RUN curl -L -o /opt/openshift/configuration/plugins/ssh-credentials.hpi http://u
 RUN curl -L -o /opt/openshift/configuration/plugins/credentials.hpi http://updates.jenkins-ci.org/latest/credentials.hpi
 RUN curl -L -o /opt/openshift/configuration/plugins/mailer.hpi http://updates.jenkins-ci.org/latest/mailer.hpi
 
+# JA Bride:  adding delivery-pipeline plugin
+RUN curl -L -o /opt/openshift/configuration/plugins/delivery-pipeline-plugin.hpi       https://updates.jenkins-ci.org/download/plugins/delivery-pipeline-plugin/0.9.7/delivery-pipeline-plugin.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/build-pipeline-plugin.hpi          http://updates.jenkins-ci.org/download/plugins/build-pipeline-plugin/1.4.4/build-pipeline-plugin.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/parameterized-trigger.hpi          http://updates.jenkins-ci.org/download/plugins/promoted-builds/2.17/promoted-builds.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/parameterized-trigger.hpi          http://updates.jenkins-ci.org/download/plugins/parameterized-trigger/2.25/parameterized-trigger.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/jquery.hpi                         http://updates.jenkins-ci.org/download/plugins/jquery/1.7.2-1/jquery.hpi
+RUN curl -L -o /opt/openshift/configuration/plugins/token-macro.hpi                    https://updates.jenkins-ci.org/download/plugins/token-macro/1.9/token-macro.hpi
+
+# JA Bride: adding sonar
+RUN curl -L -o /opt/openshift/configuration/plugins/sonar.hpi                          http://updates.jenkins-ci.org/download/plugins/sonar/2.1/sonar.hpi
+
 # JA Bride:  upgrading maven, otherwise stock maven from rhel-7-server-optional-rpms channel is used which currently is v3.0.5
 # This version of Maven causes lots of problems
 ENV MAVEN_VERSION=3.3.3

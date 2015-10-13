@@ -9,7 +9,7 @@
         <hudson.model.StringParameterDefinition>
           <name>OPENSHIFT_API_URL</name>
           <description>URL of the OpenShift api endpoint.</description>
-          <defaultValue>https://master00-mwl.opentlc.com.com:8443</defaultValue>
+          <defaultValue>https://master00-mwl.opentlc.com:8443</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>AUTH_TOKEN</name>
@@ -99,8 +99,6 @@ if [ $rc -ne 0 ]; then
     echo &quot;Fail: Build did not complete in a reasonable period of time&quot;
     exit 1
 fi
-
-
       </command>
     </hudson.tasks.Shell>
   </builders>

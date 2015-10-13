@@ -13,7 +13,11 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>AUTH_TOKEN</name>
-          <description>Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
+          <description>
+          Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
+          Jenkins OSE template comes pre-configured with the default serviceaccount.
+          Because this Jenkins container is being managed by OSE3, the use of this default serviceaccount is all that is needed for the oc utility to authenticate with the OSE master API.
+          Subsequently, this field can be left blank.
           </description>
           <defaultValue></defaultValue>
         </hudson.model.TextParameterDefinition>
@@ -24,19 +28,10 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CONFIG</name>
-          <description>The name of the BuildConfig to trigger.
+          <description>
+            The name of the BuildConfig to trigger.
             Corresponds to BuildConfig object that includes the DISABLE_ASSET_COMPILATION and APPLICATION_ARTIFACT_URL environment variables.
           </description>
-          <defaultValue>hello-nodejs</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SERVICE</name>
-          <description>The service to test after build completion</description>
-          <defaultValue>hello-nodejs</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>DEPLOYMENT_CONFIG</name>
-          <description>The name of the DeploymentConfig that deploys the output of the BuildConfig</description>
           <defaultValue>hello-nodejs</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -51,7 +46,9 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>if [ -z &quot;$AUTH_TOKEN&quot; ]; then
+      <command>
+# 1)  Authenticate oc client with OSE Master API
+if [ -z &quot;$AUTH_TOKEN&quot; ]; then
   AUTH_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
 fi
 
@@ -61,25 +58,13 @@ else
   alias oc=&quot;oc -n $PROJECT --token=$AUTH_TOKEN --server=$OPENSHIFT_API_URL --insecure-skip-tls-verify &quot;
 fi
 
-TEST_ENDPOINT=`oc get service ${SERVICE} -t &apos;{{.spec.clusterIP}}{{&quot;:&quot;}}{{ $a:= index .spec.ports 0 }}{{$a.port}}&apos;`
 
-echo &quot;none&quot; &gt; old_rc_id
-oc get rc -t &apos;{{ range .items }}{{.spec.selector.deploymentconfig}}{{&quot; &quot;}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}&apos; | grep -e &quot;^$DEPLOYMENT_CONFIG &quot; | awk &apos;{print $2}&apos; | while read -r test_rc_id; do
-  echo &quot;Scaling down old deployment $test_rc_id&quot;
-  oc scale --replicas=0 rc $test_rc_id
-  echo $test_rc_id &gt; old_rc_id
-done
-old_rc_id=`cat old_rc_id`
-
-
-# wait for old pods to be torn down
-# TODO should poll instead.
-sleep 5
-
+# 2)  Kick off build
 echo &quot;Triggering new application build and deployment&quot;
 BUILD_ID=`oc start-build ${BUILD_CONFIG}`
 
-# stream the logs for the build that just started
+
+# 3) Stream the logs for the build that just started
 rc=1
 count=0
 attempts=3
@@ -91,6 +76,7 @@ while [ $rc -ne 0 -a $count -lt $attempts ]; do
 done
 set -e
 
+# 4)  Check that build has succeeded
 echo &quot;Checking build result status&quot;
 rc=1
 count=0
@@ -116,37 +102,6 @@ if [ $rc -ne 0 ]; then
     echo &quot;Fail: Build did not complete in a reasonable period of time&quot;
     exit 1
 fi
-
-
-# scale up the test deployment
-# if this gets scaled up before the new deployment occurs from the build,
-# bad things happen...need to make sure a new deployment has occurred first.
-count=0
-attempts=20
-new_rc_id=&quot;none&quot;
-echo &quot;none&quot; &gt; new_rc_id
-while [ $new_rc_id == $old_rc_id -a $count -lt $attempts ]; do
-  oc get rc -t &apos;{{ range .items }}{{.spec.selector.deploymentconfig}}{{&quot; &quot;}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}&apos; | grep -e &quot;^$DEPLOYMENT_CONFIG &quot; | awk &apos;{print $2}&apos; | while read -r test_rc_id; do
-    echo $test_rc_id &gt; new_rc_id
-  done
-  new_rc_id=`cat new_rc_id`
-  count=$(($count+1))
-  sleep 1
-done
-if [ $count -eq $attempts ]; then
-  echo &quot;Failure: Never found new deployment&quot;
-  exit 1
-fi
-
-oc get rc -t &apos;{{ range .items }}{{.spec.selector.deploymentconfig}}{{&quot; &quot;}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}&apos; | grep -e &quot;^$DEPLOYMENT_CONFIG &quot; | awk &apos;{print $2}&apos; | while read -r test_rc_id; do
-  # at the end of this loop, &apos;test_rc_id&apos; will contain the id of the last deployment in the list
-  # should be the most recent.
-  echo $test_rc_id &gt; test_rc_id
-done
-
-test_rc_id=`cat test_rc_id`
-echo &quot;Scaling up new deployment $test_rc_id&quot;
-oc scale --replicas=1 rc $test_rc_id
       </command>
     </hudson.tasks.Shell>
   </builders>

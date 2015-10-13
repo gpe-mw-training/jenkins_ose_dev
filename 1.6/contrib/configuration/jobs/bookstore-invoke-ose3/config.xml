@@ -9,13 +9,15 @@
         <hudson.model.StringParameterDefinition>
           <name>OPENSHIFT_API_URL</name>
           <description>URL of the OpenShift api endpoint.</description>
-          <defaultValue>https://master00-mwl.opentlc.com.com:8443</defaultValue>
+          <defaultValue>https://master00-mwl.opentlc.com:8443</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>AUTH_TOKEN</name>
-          <description>Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
-          If you are running Jenkins in the same OpenShift deployment that it is communicating with and
-          you have granted appropriate roles to the service account for the pod (normally &quot;default&quot;), you can leave this blank.
+          <description>
+          Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
+          Jenkins OSE template comes pre-configured with the default serviceaccount.
+          Because this Jenkins container is being managed by OSE3, the use of this default serviceaccount is all that is needed for the oc utility to authenticate with the OSE master API.
+          Subsequently, this field can be left blank.
           </description>
           <defaultValue></defaultValue>
         </hudson.model.TextParameterDefinition>
@@ -45,15 +47,6 @@
   <builders>
     <hudson.tasks.Shell>
       <command>
-
-#   JA Bride:  Notes from discussion with Jim and Ricardo (GLS) on 25 Sept
-#   - This script is one approach to CI/CD but may likely not be a best practice in most shops
-#     1)  too automated
-#     2)  forces a 'recreate' style deployment in OSE instead of allowing ops team to configure this in the OSE DeploymentConfig as per:
-#       - https://access.redhat.com/documentation/en/openshift-enterprise/version-3.0/openshift-enterprise-30-developer-guide#strategies
-#   - Jenkins Delivery Pipeline plugin provides more options
-#       - https://wiki.jenkins-ci.org/display/JENKINS/Delivery+Pipeline+Plugin
-
 # 1)  Authenticate oc client with OSE Master API
 if [ -z &quot;$AUTH_TOKEN&quot; ]; then
   AUTH_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
