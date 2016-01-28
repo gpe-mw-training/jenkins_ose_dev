@@ -1,10 +1,10 @@
 FROM centos:centos7
 
 # JA Bride
-# sudo docker build --rm=true -t jbride/jenkins-ose-dev .
-# sudo docker run -i -t jbride/jenkins-ose-dev
-# sudo docker tag -f jbride/jenkins-ose-dev docker.io/jbride/jenkins-ose-dev
-# sudo docker push docker.io/jbride/jenkins-ose-dev
+# sudo docker build --rm=true -t rhtgptetraining/jenkins-ose-dev .
+# sudo docker run -i -t rhtgptetraining/jenkins-ose-dev
+# sudo docker tag -f rhtgptetraining/jenkins-ose-dev docker.io/rhtgptetraining/jenkins-ose-dev
+# sudo docker push docker.io/rhtgptetraining/jenkins-ose-dev
 
 # Jenkins image for OpenShift
 #
