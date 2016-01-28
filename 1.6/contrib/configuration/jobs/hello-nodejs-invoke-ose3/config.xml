@@ -14,23 +14,23 @@
         <hudson.model.TextParameterDefinition>
           <name>AUTH_TOKEN</name>
           <description>
-          Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
-          Jenkins OSE template comes pre-configured with the default serviceaccount.
-          Because this Jenkins container is being managed by OSE3, the use of this default serviceaccount is all that is needed for the oc utility to authenticate with the OSE master API.
-          Subsequently, this field can be left blank.
+Authentication token of an account/serviceaccount for accessing the project to run builds and tag images.
+Jenkins OSE template comes pre-configured with the default serviceaccount.
+Because this Jenkins container is being managed by OSE3, the use of this default serviceaccount is all that is needed for the oc utility to authenticate with the OSE master API.
+Subsequently, this field can be left blank.
           </description>
           <defaultValue></defaultValue>
         </hudson.model.TextParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PROJECT</name>
           <description>The OpenShift project this job will access</description>
-          <defaultValue>jbride-redhat-osedev</defaultValue>
+          <defaultValue>rh-jbride-redhat-com-devops-using-ose</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CONFIG</name>
           <description>
-            The name of the BuildConfig to trigger.
-            Corresponds to BuildConfig object that includes the DISABLE_ASSET_COMPILATION and APPLICATION_ARTIFACT_URL environment variables.
+The name of the BuildConfig to trigger.
+Corresponds to BuildConfig object that includes the DISABLE_ASSET_COMPILATION and APPLICATION_ARTIFACT_URL environment variables.
           </description>
           <defaultValue>hello-nodejs</defaultValue>
         </hudson.model.StringParameterDefinition>
@@ -47,6 +47,8 @@
   <builders>
     <hudson.tasks.Shell>
       <command>
+# Responsible for triggering S2I process for our application
+
 # 1)  Authenticate oc client with OSE Master API
 if [ -z &quot;$AUTH_TOKEN&quot; ]; then
   AUTH_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
@@ -58,8 +60,7 @@ else
   alias oc=&quot;oc -n $PROJECT --token=$AUTH_TOKEN --server=$OPENSHIFT_API_URL --insecure-skip-tls-verify &quot;
 fi
 
-
-# 2)  Kick off build
+# 2)  Kick off S2I
 echo &quot;Triggering new application build and deployment&quot;
 BUILD_ID=`oc start-build ${BUILD_CONFIG}`
 
