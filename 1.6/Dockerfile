@@ -37,11 +37,7 @@ RUN curl http://pkg.jenkins-ci.org/redhat/jenkins.repo -o /etc/yum.repos.d/jenki
     rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key && \
     yum install -y tar zip unzip java-1.8.0-openjdk-devel jenkins-1.609 git && \
     yum clean all  && \
-    chmod og+rw /var/lib/jenkins && \
-    curl -L https://github.com/openshift/origin/releases/download/v1.0.2/openshift-origin-v1.0.2-325c7b7-linux-amd64.tar.gz | tar -zx && \
-    mv oc /usr/local/bin && \
-    rm oadm && \
-    rm openshift
+    chmod og+rw /var/lib/jenkins
 
 # JA Bride:  adding needed git plugin
 RUN curl -L -o /opt/openshift/configuration/plugins/git.hpi http://updates.jenkins-ci.org/latest/git.hpi
@@ -75,6 +71,7 @@ RUN rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.no
     yum install -y nodejs npm && \
     yum clean all
 
+COPY oc /usr/local/bin/oc
 COPY run.sh /usr/local/bin/run.sh
 COPY ./contrib/ /opt/openshift
 RUN  chmod -R og+rw /opt/openshift
